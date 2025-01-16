@@ -2,7 +2,7 @@
 
 import tensorflow as tf
 from keras._tf_keras.keras.models import Sequential
-from keras._tf_keras.keras.layers import Dense, GlobalAveragePooling2D,MaxPooling2D,Conv2D,Dropout
+from keras._tf_keras.keras.layers import Dense, GlobalAveragePooling2D,MaxPooling2D,Conv2D,Dropout,Flatten
 from keras._tf_keras.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
@@ -25,6 +25,7 @@ def create_model():
         Dropout(0.25),
         
         GlobalAveragePooling2D(),
+        Flatten(),
 
         Dense(128, activation='relu'),  
         Dense(4, activation='softmax')
