@@ -8,7 +8,6 @@ from keras._tf_keras.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
 def create_model():
-    # base_model = EfficientNetB3(weights='imagenet', include_top=False, input_shape=(256,256,3))
     model = Sequential([
         
         Conv2D(filters=32,kernel_size=(3,3),activation='relu',input_shape=(256,256,3),padding='same'),

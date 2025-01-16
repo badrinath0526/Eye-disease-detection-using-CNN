@@ -34,7 +34,7 @@ validation_ds = image_dataset_from_directory(
 model = create_model()
 
 # Train and evaluate the model
-model = train_and_evaluate(model, train_ds, validation_ds, epochs=5)
+model = train_and_evaluate(model, train_ds, validation_ds, epochs=35)
 
 # print(f"Test accuracy: {test_acc}")
 
