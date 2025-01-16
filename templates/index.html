@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Disease Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Hide the default file input */
+        #file {
+            display: none;
+        }
+
+        /* Style the custom upload button */
+        .custom-upload-button {
+            background-color: #294fa0; /* Green */
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .custom-upload-button:hover {
+            background-color: #294fa0;
+        }
+
+        /* Style the custom hyperlink */
+        .custom-upload-link {
+            color: #294fa0;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .custom-upload-link:hover {
+            text-decoration: underline;
+        }
+
+        .upload-instructions {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px; /* Add some space below */
+        }
+
+        /* Styles for the instructions text */
+        .formats {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px; /* Adds space between text and format instructions */
+        }
+
+        /* Add styles to display file name */
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none; /* Set the initial state of error message to hidden */
+        }
+        .confidence-chart-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Eye Disease Detection</h1>
+        <p class="upload-instructions">Upload an image of the retina scan to diagnose the disease 
+            <span class="formats">*(Only jpg,jpeg,png formats are allowed)</span></p>
+
+        <!-- Custom hyperlink to trigger file input -->
+        <a href="javascript:void(0);" class="custom-upload-link" onclick="document.getElementById('file').click();">Choose file</a>
+
+        <form id="predict-form" action="/predict" method="POST" enctype="multipart/form-data">
+            <!-- Hidden file input -->
+            <input type="file" name="file" id="file" accept="image/jpeg, image/png, image/jpg" />
+            
+            <!-- Display file name -->
+            <div id="file-name" class="file-name"></div>
+
+            <div id="error-message" class="error-message">Please upload an image.</div> <!-- Display error message here -->
+            <!-- Upload and Predict button -->
+            <button type="submit" class="custom-upload-button">Upload and Predict</button>
+        </form>
+
+        <div id="result" style="display:none;">
+            <h2>Prediction Result</h2>
+            <p><strong>Class:</strong> <span id="prediction"></span></p>
+            <!-- <p><strong>Confidence:</strong> <span id="confidence"></span></p> -->
+            <div id="confidence-chart-container" class="confidence-chart-container">
+                <canvas id="confidence-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Get elements for form handling and result display
+    const form = document.getElementById('predict-form');
+    const fileInput = document.getElementById('file');
+    const fileNameDiv = document.getElementById('file-name');  // To display the file name
+    const resultDiv = document.getElementById('result');
+    const predictionElement = document.getElementById('prediction');
+    // const confidenceElement = document.getElementById('confidence');
+    const errorMessageDiv = document.getElementById('error-message'); // Error message div
+    const confidenceChartContainer = document.getElementById('confidence-chart-container');
+    const chartCanvas = document.getElementById('confidence-chart'); 
+    let resultTimeout;  // Store the result hide timeout
+
+    let chartInstance=null;
+    // Show the file name when a file is selected
+    fileInput.addEventListener('change', function () {
+        const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
+        fileNameDiv.textContent = fileName ? `File selected: ${fileName}` : 'No file selected';
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();  // Prevent page reload when the form is submitted
+
+        // Check if a file is selected
+        if (!fileInput.files[0]) {
+            console.log("No file selected");
+            errorMessageDiv.style.display = 'block';  // Show error message if no file is selected
+            resultDiv.style.display = 'none';  // Hide result div if no file selected
+            confidenceChartContainer.style.display = 'none';
+            return;  // Stop the form from submitting
+        }
+
+        // Hide the error message if file is selected
+        errorMessageDiv.style.display = 'none';
+
+        // Clear previous results and stop the 10-second timer if any
+        clearTimeout(resultTimeout);
+        resultDiv.style.display = 'none';
+        predictionElement.textContent = '';
+        // confidenceElement.textContent = '';
+        confidenceChartContainer.style.display = 'none';
+        // Process the form data
+        const formData = new FormData(form);
+
+        fetch('/predict', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    console.log('Received confidence:', data.confidence);
+                    // Display the prediction result
+                    predictionElement.textContent = data.prediction;
+                    resultDiv.style.display='block';
+
+                    if(chartInstance){
+                        chartInstance.destroy();
+                    }
+                    // confidenceElement.textContent = (data.confidence * 100).toFixed(2) + '%';
+                    const labels = ['Cataract', 'Diabetic Retinopathy', 'Glaucoma', 'Normal'];
+        let confidenceData = Array(data.confidence.length).fill(0); // Initialize all values to 0
+        const maxIndex = data.confidence.indexOf(Math.max(...data.confidence)); // Find index of max confidence
+        confidenceData[maxIndex] = data.confidence[maxIndex] * 100; 
+                          
+                            confidenceChartContainer.style.display = 'block';
+
+                            chartInstance = new Chart(chartCanvas, {
+    type: 'bar',  // Change chart type to 'bar'
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Confidence (%)',
+            data: confidenceData,
+            backgroundColor: 'rgba(41, 79, 160, 0.6)',  // Set color for the bars
+            borderColor: 'rgba(41, 79, 160, 1)',  // Set border color for the bars
+            borderWidth: 1  // Set border width
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (tooltipItem) {
+                        return tooltipItem.raw.toFixed(2) + '%';  // Add percentage sign to tooltip
+                    }
+                }
+            }
+        }
+    }
+});
+                    // resultDiv.style.display = 'block';  // Show the result div
+
+                    // Start a 10-second timeout to hide the result
+                    resultTimeout = setTimeout(function () {
+                        resultDiv.style.display = 'none';  // Hide result div after 10 seconds
+                        resetFileInput();  // Reset file input
+                    }, 25000);  // 10 seconds
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    // Function to reset the file input
+    function resetFileInput() {
+        fileInput.value = '';  // Clear the file input
+        fileNameDiv.textContent = 'No file selected';  // Reset the file name text
+        fileNameDiv.style.margin = "10px";
+        errorMessageDiv.style.display = 'none';  // Hide error message when reset
+    }
+
+    // Reset the file input when the page is reloaded
+    window.onload = function () {
+        resetFileInput();
+        resultDiv.style.display = 'none';  // Ensure the result div is hidden on page load
+    };
+});
+
+
+    </script>
+</body>
+</html>
+
+
