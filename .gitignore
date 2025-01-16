@@ -1,5 +1,5 @@
 Eyedisease/
-Eye_Disease_Detection.keras
+# Eye_Disease_Detection.keras
 __pycache__/
 *.py[cod]
 *$py.class
