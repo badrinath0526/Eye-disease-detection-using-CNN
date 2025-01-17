@@ -1,1 +1,1 @@
-web: gunicorn app:app --workers 4 --timeout 120 --max-memory-per-child 500000
+web: gunicorn app:app --workers 4 --timeout 120 
