@@ -5,7 +5,7 @@ from keras._tf_keras.keras.preprocessing import image_dataset_from_directory
 from modeltraining import create_model, train_and_evaluate
 from visualization import visualize_images
 
-# Load datasets directly without any preprocessing
+# Load datasets directly 
 train_ds = image_dataset_from_directory(
     directory='./Eyedisease',
     batch_size=16,

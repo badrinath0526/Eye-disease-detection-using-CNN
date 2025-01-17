@@ -3,6 +3,8 @@
 import os
 import random
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 from PIL import Image
 
 def visualize_images(path, target_size=(256, 256), num_images=5):

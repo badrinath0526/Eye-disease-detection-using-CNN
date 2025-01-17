@@ -6,7 +6,6 @@ __pycache__/
 practice.py 
 # C extensions
 *.so
-src/
 
 # Distribution / packaging
 .Python

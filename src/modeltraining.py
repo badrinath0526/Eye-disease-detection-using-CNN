@@ -26,7 +26,7 @@ def create_model():
         
         GlobalAveragePooling2D(),
         Flatten(),
-
+        
         Dense(128, activation='relu'),  
         Dense(4, activation='softmax')
     ])
