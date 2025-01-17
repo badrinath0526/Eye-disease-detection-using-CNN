@@ -3,4 +3,5 @@ gunicorn
 flask
 numpy
 tensorflow
-requests
+matplotlib
+pandas
