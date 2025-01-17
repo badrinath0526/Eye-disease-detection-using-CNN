@@ -153,11 +153,12 @@ document.addEventListener("DOMContentLoaded", function () {
         clearTimeout(resultTimeout);
         resultDiv.style.display = 'none';
         predictionElement.textContent = '';
-        // confidenceElement.textContent = '';
+        
         confidenceChartContainer.style.display = 'none';
         // Process the form data
         const formData = new FormData(form);
-
+        console.log("Sending request to /predict with form data")
+        
         fetch('/predict', {
             method: 'POST',
             body: formData
