@@ -1,5 +1,4 @@
-keras._tf_keras
+keras
 gunicorn
 flask
 numpy
-matplotlib.pyplot
