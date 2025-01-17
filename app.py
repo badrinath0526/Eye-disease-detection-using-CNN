@@ -13,14 +13,14 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger=logging.getLogger(__name__)
 
-# Load the trained model
+# Load the trained model 
 try:
     model = load_model('Eye_Disease_Detection.keras')
     logger.info("Model loaded successfully")
 except Exception as e:
     logger.error(f"Error loading the model:{str(e)}")
 
-# Define class labels (you can change them to match your specific dataset)
+# Define class labels 
 CLASS_NAMES = ['cataract', 'diabetic_retinopathy','glaucoma', 'normal']
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
@@ -32,7 +32,7 @@ def prepare_image(img_bytes):
     try:
         logger.debug("Preparing image for prediction")
         img = Image.open(BytesIO(img_bytes)).resize((256, 256))  # Resize image to match input size
-        img_array = np.array(img) # Normalize the image
+        img_array = np.array(img)# Normalize the image
         logger.debug(f"Image shape before preprocessing: {img_array.shape}")
         img_array=preprocess_input(img_array)
         img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
