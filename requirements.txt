@@ -1,8 +1,5 @@
-tensorflow
-keras
-matplotlib
-pandas
-numpy 
-scikit-learn
+keras._tf_keras
 gunicorn
 flask
+numpy
+matplotlib.pyplot
