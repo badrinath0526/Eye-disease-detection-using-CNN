@@ -7,9 +7,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'flask',
-        'pandas',
         'numpy',
-        'scikit-learn',
         'keras',
         'matplotlib',
         'tensorflow',
