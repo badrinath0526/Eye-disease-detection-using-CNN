@@ -45,6 +45,7 @@ def prepare_image(img_bytes):
 def index():
     return render_template('index.html')
 
+#Function to predict the class of the input image
 @app.route('/predict', methods=['POST'])
 def predict():
     try:

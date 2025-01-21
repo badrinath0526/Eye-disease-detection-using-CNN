@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 from PIL import Image
 
+# Visualizes 5 random images from the dataset
 def visualize_images(path, target_size=(256, 256), num_images=5):
     image_filenames = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 

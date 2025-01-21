@@ -6,6 +6,7 @@ from keras._tf_keras.keras.layers import Dense, GlobalAveragePooling2D,MaxPoolin
 from keras._tf_keras.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
+# Creates a model and compiles it
 def create_model():
     model = Sequential([
         
